@@ -6,11 +6,13 @@ class Node{
     public:
     int data;
     Node* next;
+    Node* prev;
 
     // Constructor
     Node(int data){
         this->data = data;
         this->next = NULL;
+        this->prev = NULL;
     }
 
     // Destructor
@@ -35,6 +37,7 @@ void insertAtHead(Node* &head, Node* &tail, int data){
     }else{
         Node* temp = new Node(data);
         temp->next = head;
+        head->prev = temp;
         head = temp;
     }
 }
@@ -48,28 +51,48 @@ void print(Node* &head){
     cout << endl;
 }
 
+void insertAtTail(Node* &tail, int data){
+
+    if(tail == NULL){
+        Node* temp = new Node(data);
+        tail = temp;
+        return;
+    }else{
+        Node* temp = new Node(data);
+        tail->next = temp;
+        temp->prev = tail;
+        tail = temp;    
+    }
+}
+
 void insertAtPosition(Node* &head, Node* &tail, int position, int data){
-    if(position == 0){
+    // insert at start
+    if(position == 1){
         insertAtHead(head, tail, data);
         return;
     }
 
     Node* temp = head;
-    int count = 0;
+    int cnt = 1;
 
-    while(count < position - 1 && temp != NULL){
+    while(cnt < position - 1){
         temp = temp->next;
-        count++;
+        cnt++;
     }
 
-    if(temp == NULL){
-        cout << "Position is out of bounds" << endl;
+    // insert at last position
+    if(temp->next == NULL){
+        insertAtTail(tail, data);
         return;
     }
 
+    // creating a node for data
     Node* nodeToInsert = new Node(data);
+
     nodeToInsert->next = temp->next;
+    temp->next->prev = nodeToInsert;
     temp->next = nodeToInsert;
+    nodeToInsert->prev = temp;
 }
 
 void deleteNode(Node* &head, int position, Node* &tail){
@@ -79,66 +102,57 @@ void deleteNode(Node* &head, int position, Node* &tail){
 
         Node* temp = head;
         head = head->next;
+        head->prev = NULL;
         temp->next = NULL;
         delete temp;
     }else{
 
         Node* curr = head;
         Node* prev = NULL;
-        int count = 1;
 
-        while(count < position){
+        int cnt = 1;
+        while(cnt < position){
             prev = curr;
             curr = curr->next;
-            count++;
+            cnt++;
         }
 
+        // deleting last node
         if(curr->next == NULL){
             tail = prev;
-        }
-
-        if(curr == NULL){
-            cout << "Position is out of bounds" << endl;
+            tail->next = NULL;
+            curr->prev = NULL;
+            delete curr;
             return;
         }
 
+        curr->prev = NULL;
         prev->next = curr->next;
+        curr->next->prev = prev;
         curr->next = NULL;
+
         delete curr;
     }
 }
 
-void insertAtTail(Node* &tail, int data){
-
-    if(tail == NULL){
-        Node* temp = new Node(data);
-        tail = temp;
-        return; 
-    }else{
-        Node* temp = new Node(data);
-        tail->next = temp;
-        tail = temp;
-    }
-}
-
 int main(){
-    
 
-    Node* head  = NULL;
+    Node* head = NULL;
     Node* tail = NULL;
 
-    insertAtTail(tail, 20);
+    insertAtHead(head, tail, 5);
     print(head);
 
-    insertAtPosition(head, tail, 1, 15);
+    insertAtTail(tail, 40);
     print(head);
 
-    cout << "head: " << head->data << endl;
-    cout << "tail: " << tail->data << endl;
+    insertAtPosition(head, tail, 3, 15);
+    print(head);
 
-    deleteNode(head, 2, tail);
+    deleteNode(head, 3, tail);
+    print(head);
     print(tail);
-    print(head);
 
     return 0;
+    
 }
